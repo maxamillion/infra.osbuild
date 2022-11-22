@@ -1,0 +1,67 @@
+# vim: ft=yaml.ansible
+---
+- name: Setup the builder and run a full demo
+  hosts: builder
+  vars:
+    pubkey_file: "~/.ssh/id_rsa.pub"
+    blueprint_src_path: "/tmp/testblueprint.toml"
+  tasks:
+    - name: Run the role
+      ansible.builtin.import_role:
+        name: infra.osbuild.setup_server
+    - name: Run the role
+      ansible.builtin.import_role:
+        name: infra.osbuild.builder
+    - name: Slurp the pubkey
+      ansible.builtin.slurp:
+        src: "{{ pubkey_file }}"
+      register: slurp_out
+    - name: Create a blueprint
+      infra.osbuild.create_blueprint:
+        dest: "{{ blueprint_src_path }}"
+        name: "my-rhel-edge-test"
+        version: "0.0.1"
+        packages:
+          - "vim-enhanced"
+          - "ansible-core"
+          - "git"
+        customizations:
+          user:
+            name: "core"
+            description: "test user"
+            password: "openshift"
+            key: "{{ slurp_out['content'] | b64decode }}"
+            groups: '["users", "wheel"]'
+
+    - name: Push the blueprint into image builder
+      infra.osbuild.push_blueprint:
+        src: "{{ blueprint_src_path }}"
+
+    - name: Start compose
+      infra.osbuild.start_compose:
+        blueprint: "my-rhel-edge-test"
+        compose_type: "{{ compose_type }}"
+      register: compose_start_out
+
+    - name: Debug output for compose_start_out
+      ansible.builtin.debug:
+        var: compose_start_out
+
+    - name: Wait for compose to finish
+      infra.osbuild.wait_compose:
+        compose_id: "{{ compose_start_out['result']['build_id'] }}"
+
+    - name: Export the compose artifact
+      infra.osbuild.export_compose:
+        compose_id: "{{ compose_start_out['result']['build_id'] }}"
+        dest: "/tmp/composer-compose.tar"
+
+    - name: Download mycompose.tar
+      ansible.posix.synchronize:
+        mode: pull
+        src: "/tmp/composer-compose.tar"
+        dest: "/tmp/compose-{{ compose_start_out['result']['build_id'] }}.tar"
+
+#- name: Run an update on the edge systems
+#  hosts: edge
+
