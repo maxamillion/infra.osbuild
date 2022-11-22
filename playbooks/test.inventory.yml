@@ -1,0 +1,14 @@
+---
+- all:
+    children:
+      builder:
+        hosts:
+          osbuild1: 139.144.33.248
+        vars:
+          ansible_user: root
+      edge:
+        hosts:
+          edge1: 192.168.122.55
+        vars:
+          ansible_user: root
+

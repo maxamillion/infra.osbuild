@@ -31,9 +31,9 @@
       - syslinux
       - cockpit
 
-- name: RHEL8, CentOS8 and Fedora32 =< specific setup
+- name: RHEL8 and Fedora32 =< specific setup
   when:
-    - ansible_distribution in ['RedHat', 'CentOS', 'Fedora']
+    - ansible_os_family == 'RedHat'
     - ansible_distribution == 'Fedora' and ansible_distribution_major_version|int < 33 or
       ansible_distribution_major_version|int == 8
   block:
@@ -43,9 +43,9 @@
         name:
           - python3-pytoml
 
-- name: RHEL9, CentOS9 and Fedora33 => specific setup
+- name: EL9 and Fedora33 => specific setup
   when:
-    - ansible_distribution in ['RedHat', 'CentOS', 'Fedora']
+    - ansible_os_family == 'RedHat'
     - ansible_distribution == 'Fedora' and ansible_distribution_major_version|int > 32 or
       ansible_distribution_major_version|int == 9
   block:
