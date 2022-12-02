@@ -13,7 +13,7 @@ ostreesetup --nogpg --osname=rhel --remote=edge --url=http://{{ ansible_host }}/
 
 %post
 # Create ansible playbook to register device to Ansible automation platform
-cat > /tmp/add_to_aap.yml <<EOF
+cat > /var/tmp/add_to_aap.yml <<EOF
 ---
 - hosts: localhost
   gather_facts: true
@@ -32,5 +32,21 @@ cat > /tmp/add_to_aap.yml <<EOF
        body_format: json
        validate_certs: no
 EOF
-ansible-playbook /tmp/add_to_aap.yml
+
+cat > /usr/lib/systemd/system/aap-autoreg-firstboot.service <<EOF
+[Unit]
+Description=AAP Edge automatic firstboot playbook run
+After=packagekit.service rpm-ostreed.service
+ConditionKernelCommandLine=!rd.live.image
+ConditionFirstBoot=yes
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ansible-playbook /var/tmp/add_to_aap.yml && rm /var/tmp/add_to_aap.yml
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable aap-autoreg-firstboot.service
 %end
