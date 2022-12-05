@@ -5,5 +5,7 @@
 
 blueprint_src_path: "/tmp/blueprint.toml"
 pubkey: "ssh-rsa FAKEPUBKEY"
+builder_blueprint_distro: "centos-9"
+builder_blueprint_ref: "centos/9/x86_64/edge"
 
 compose_type: "edge-commit"
