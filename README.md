@@ -59,3 +59,18 @@ Example:
 ansible-playbook playbooks/osbuild_builder.yml -e builder_compose_type=edge-installer
 ```
 
+
+## Releases
+
+Releases are based on git tags and follow [semantic versioning](https://semver.org/).
+
+### Creating a release
+
+1. Create a new branch in your fork called `release/X.Y.Z` (replacing the `X.Y.Z` with the appropriate version number).
+2. Generate the Changelog from the snippets using [antsibull-changelog](https://github.com/ansible-community/antsibull-changelog), as prescribed in the [Ansible Developer docs](https://docs.ansible.com/ansible/latest/dev_guide/developing_collections_changelogs.html).
+3. Ensure the version `X.Y.Z` is changed in the `galaxy.yml` file to correctly represent the new release version.
+4. Commit changes
+5. Create a pull request
+6. Once the pull request is merged, have one of the [repo maintainers](https://github.com/redhat-cop/infra.osbuild/graphs/contributors) tag the commit and push it to the parent repository.
+
+
